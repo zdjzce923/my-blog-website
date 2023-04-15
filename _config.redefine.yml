@@ -197,13 +197,13 @@ home:
     announcement: # Announcement text
     links:
       Archives: 
-        path: /blog/archives
+        path: /archives
         icon: fa-regular fa-archive # can be empty
       Tags: 
-        path: /blog/tags
+        path: /tags
         icon: fa-regular fa-tags # can be empty
       Categories: 
-        path: /blog/categories
+        path: /categories
         icon: fa-regular fa-folder # can be empty
       # ...... # you can add more
   # Article date format
