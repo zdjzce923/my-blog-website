@@ -1,5 +1,5 @@
 ---
-title: JS 面试题
+title: JS 面试题（一）
 date: 2023-04-15 11:06:20
 tags:
   - JavaScript
@@ -27,7 +27,7 @@ JS 共有八种数据类型， Undefined, Null, Boolean, Number, String, Object,
 1. typeof （数组、对象、null会被判断为 object）
 2. instanceof (不能检测原始类型，查看对象原型链中是否存在构造函数的 prototype 属性)
 3. constructor 通过对象实例的 construcotr 判断类型或查看实例的构造函数
-  ```
+  ```javascript
    function Fn(){};
  
    Fn.prototype = new Array();
@@ -44,7 +44,7 @@ JS 共有八种数据类型， Undefined, Null, Boolean, Number, String, Object,
 Null是空对象，undefined是未定义。
 
 ### 4. instanceof 的实现原理
-```
+```javascript
 function myInstanceof(left, right) {
   // 获取对象的原型
   let proto = Object.getPrototypeOf(left)
@@ -95,7 +95,7 @@ ES6中提供了 **Number.EPSILON**。这个属性其实是设置了一个误差�
 
 ##### 2. 数组扩展运算符
 1. 可以将数组元素进行展开，只能展开一层
-```
+```javascript
   console.log(...[1, 2, 3])
   // 1 2 3
   console.log(...[1, [2, 3, 4], 5])
@@ -103,14 +103,14 @@ ES6中提供了 **Number.EPSILON**。这个属性其实是设置了一个误差�
 ```
 2. 合并数组
   扩展运算符与解构赋值结合起来，用于生成数组
-  ```
+  ```javascript
   const [first, ...rest] = [1, 2, 3, 4, 5];
   first // 1
   rest  // [2, 3, 4, 5]
   ```
   **注意**：解构赋值时，展开运算符必须放在最后
 3. 将字符串转为数组
-```
+```javascript
    [...'hello']
 ```
 4. 用于替换es5中的Array.prototype.slice.call(arguments)写法。
@@ -122,7 +122,7 @@ ES6中提供了 **Number.EPSILON**。这个属性其实是设置了一个误差�
 2. 设置原型，讲对象的原型设置为函数的 prototype 对象
 3. 让函数的 this 指向这个对象，执行构造函数的代码
 4. 判断函数的返回值类型，如果是值类型，返回创建的对象，如果是引用类型，就返回引用类型的对象
-   ```
+   ```javascript
     function objectFactory() {
         let newObject = null;
         let constructor = Array.prototype.shift.call(arguments);
