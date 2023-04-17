@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div></div>
+  <button>btn</button>
+  <script>
+    const throttleCallBack = throttle(logs, 5000);
+
+    const btn = document.querySelector("button");
+    btn.addEventListener("click", (e) => {
+      throttleCallBack(e);
+    });
+
+    function throttle(fn, delay) {
+      let freeze = false;
+      return function () {
+        const _args = arguments;
+        const that = this;
+        const now = Date.now();
+        if (!freeze) {
+          freeze = true;
+          fn.apply(that, _args);
+
+          setTimeout(() => {
+            freeze = false;
+          }, delay);
+
+        }
+      };
+    }
+
+    function logs (e) {
+      console.log("is click", e);
+    }
+
+
+  </script>
+</body>
+
+</html>
