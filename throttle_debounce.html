@@ -10,24 +10,23 @@
 
 <body>
   <div></div>
-  <button>btn</button>
+  <button id="throttle">throttle</button>
+  <button id="debounce">debounce</button>
   <script>
     const throttleCallBack = throttle(logs, 5000);
 
-    const btn = document.querySelector("button");
+    const btn = document.querySelector("#throttle");
     btn.addEventListener("click", (e) => {
       throttleCallBack(e);
     });
 
-    function throttle(fn, delay) {
+    function throttle (fn, delay) {
       let freeze = false;
       return function () {
-        const _args = arguments;
         const that = this;
-        const now = Date.now();
         if (!freeze) {
           freeze = true;
-          fn.apply(that, _args);
+          fn.apply(that, arguments);
 
           setTimeout(() => {
             freeze = false;
@@ -40,6 +39,25 @@
     function logs (e) {
       console.log("is click", e);
     }
+
+    const debounceBtn = document.querySelector('#debounce');
+    const debounce = debounceHandle(logs, 3000)
+    debounceBtn.addEventListener('click', debounceHandle(logs, 3000));
+
+    function debounceHandle (fn, delay) {
+      let timer = null
+      return function () {
+        const that = this
+
+        if (timer) clearTimeout(timer)
+
+        timer = setTimeout(() => {
+          fn.apply(that, arguments)
+        }, delay)
+      }
+
+    }
+
 
 
   </script>

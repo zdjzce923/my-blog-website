@@ -47,14 +47,62 @@ Node.js 在主线程里维护了一个事件队列，当接到请求后，就�
 他利用了事件冒泡，只指定了一个事件处理程序，就可以管理某一种类型的所有事件。不必给每个可点击的元素分别添加事件处理程序。
 
 ### 28. 防抖和节流
-防抖：
+防抖：指在一段时间内如果频繁触发某个事件，会重新计时，在时间过后才会执行事件。场景 resize 去重新渲染的时候。
 ```javascript
+function debounceHandle (fn, delay) {
+  let timer = null
+  return function () {
+    const that = this
+
+    if (timer) clearTimeout(timer)
+
+    timer = setTimeout(() => {
+      fn.apply(that, arguments)
+    }, delay)
+  }
+
+}
+```
+节流：应用场景：用户频繁点击提交
+```javascript
+function throttle(fn, delay) {
+  let freeze = false
+
+  return function() {
+    const that = this
+    if (!freeze) {
+      freeze = true
+      fn.apply(that, arguments)
+
+      setTimeout(() => {
+        freeze = false
+      }, delay)
+    }
+  }
+
+}
+```
+
+### 29. 垃圾回收机制
+1. 标记清除
+   当变量进入环境，会做一个进入标记，当变量离开环境，会做一个离开的标记。标记离开就会被回收。
+   工作流程：垃圾回收器会给存储在内存中的所有变量都加上标记。垃圾回收器会销毁那些带离开标记的值并回收他们所占用的内存空间。
+2. 引用计数
+   跟踪每个值被引用的次数。
+   比如声明一个变量并将引用类型的值赋值给变量，那么引用类型的引用次数就 +1。
+   如果这个变量又被赋值成其他值，那么引用类型的引用次数 -1。
+   当引用次数变为 0，垃圾回收下一次运行，就会释放引用次数是 0 的值所占的内存。
+
+### 30. 实现 call apply bind
+call:
+```javaScript
 
 ```
-节流：
-```
-```
-应用场景：
+apply:
+```javaScript
 
-### 29. 排序算法 事件空间的复杂度
+```
+bind:
+```javaScript
 
+```
