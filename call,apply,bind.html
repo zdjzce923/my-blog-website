@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+
+    function test () {
+      console.log('this.name', this.name)
+    }
+
+    const obj = {
+      name: 'obj.name'
+    }
+
+    Function.prototype.my_call = function(context, ...args) {
+      if (typeof this !== 'function') throw new TypeError('please enter function')
+
+      context = context || 'window'
+      // 给当前的对象添加fn属性 指向调用的函数 例如这个this其实就是 调用了my_call的那个函数。
+      const fn = Symbol('fn')
+      context[fn] = this
+      // 再用这个对象调用函数 this 自然就是这个对象了
+      const result = context[fn](...args)
+
+      delete context[fn]
+
+      return result
+    }
+
+    test.my_call(obj)
+  </script>
+</body>
+
+</html>
