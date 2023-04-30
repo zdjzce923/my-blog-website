@@ -10,9 +10,9 @@
 # BASIC INFORMATION >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start
 info:
   # Site title
-  title: Zeng
+  title: ZDJ&ZCE
   # Author name
-  author: Zeng
+  author: ZDJ&ZCE
   # Site URL
   url: http://www.zdjzce.life
 # BASIC INFORMATION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< end
@@ -99,7 +99,7 @@ home_banner:
     light: ../images/wallhaven-wqery6-light.webp # light mode
     dark: ../images/wallhaven-wqery6-dark.webp # dark mode
   # Home banner title
-  title: Zeng
+  title: ZDJ&ZCE
   # Home banner subtitle
   subtitle:
     text: ['学而不思则罔，思而不学则殆', '盛年不重来，一日难再晨'] # subtitle text, array
