@@ -41,6 +41,55 @@ Playground 最强大的能力其实在于，支持非常简单的配置切换，
 
 ![avatar](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c402069d1bc541398e4c6d24571d453b~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
 
+### TS 文件的快速执行：ts-node 与 ts-node-dev
+ts-node 能够执行 ts 文件，就像 `node index.js` 一样，ts-node-dev 则是像 `nodemon` 可以监听文件的变更对 ts 重新执行。
 
+#### ts-node
+全局安装 ts-node 和 ts
+```bash
+$ npm i ts-node typescript -g
+```
 
+如果全局安装了 TypeScript，可以这么做:
+```bash
+tsc --init
+```
 
+接着，创建一个 TS 文件：
+```ts
+console.log('hello ts')
+```
+
+再使用 ts-node 执行 (这里用了 alias ts-node)
+```bash
+tsn index.ts
+```
+
+如果一切正常，此时终端能够正确地输出字符。ts-node 可以通过两种方式进行配置，在 tsconfig 中**新增 'ts-node' 字段**，或在执行 ts-node 时**作为命令行的参数**:
+
+`-P,--project`：指定你的 tsconfig 文件位置。默认情况下 ts-node 会查找项目下的 tsconfig.json 文件，如果你的配置文件是 tsconfig.script.json、tsconfig.base.json 这种，就需要使用这一参数来进行配置了。
+`-T, --transpileOnly`：禁用掉执行过程中的类型检查过程，这能让你的文件执行速度更快，且不会被类型报错卡住。这一选项的实质是使用了 TypeScript Compiler API 中的 transpileModule 方法，我们会在后面的章节详细讲解。
+`--swc`：在 transpileOnly 的基础上，还会使用 swc 来进行文件的编译，进一步提升执行速度。
+`--emit`：如果你不仅是想要执行，还想顺便查看下产物，可以使用这一选项来把编译产物输出到 .ts-node 文件夹下（需要同时与 **--compilerHost 选项一同使用** tsn --emit --compilerHos xxx.ts）。
+
+#### ts-node-dev
+ts-node-dev 基于 node-dev（一个类似 nodemon 的库，提供监听文件重新执行的能力） 与 ts-node 实现，并在重启文件进程时共享同一个 TS 编译进程，避免了每次重启时需要重新实例化编译进程等操作。
+
+安装：
+```bash
+npm i ts-node-dev -g
+```
+
+ts-node-dev 在全局提供了 `tsnd` 这一简写，可以运行 tsnd 来检查安装情况。最常见的使用命令是这样的：
+```bash
+tsnd --respawn --transpile-only xxx.ts
+```
+respawn 选项启用了监听重启的能力，而 transpileOnly 提供了更快的编译速度。可以查看官方仓库来了解更多选项，但在大部分场景中以上这个命令已经足够了。
+
+可以通过工具类型的形式，如 tsd 这个 npm 包提供的一系列工具类型，能帮助你进行声明式的类型检查：：
+```ts
+import { expectType } from 'tsd';
+
+expectType<string>("linbudu"); // √
+expectType<string>(599); // ×
+```
