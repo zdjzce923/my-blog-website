@@ -10,7 +10,7 @@
 
 <body>
   <script>
-    class Publisher {
+    /* class Publisher {
       constructor() {
         this.observers = []
         console.log('Publisher created')
@@ -53,7 +53,28 @@
     }
 
     const a = new PrdPublisher()
-    console.log('a:', a)
+    console.log('a:', a) */
+    function objectEntries (obj) {
+      let index = 0
+      const keys = Reflect.ownKeys(obj)
+      return {
+        [Symbol.iterator] () {
+          console.log('this:', this)
+          return this
+        },
+        next () {
+          if (index >= keys.length) return { done: true }
+          const key = keys[index]
+          index++
+          return { value: [key, obj[key]] }
+        }
+      }
+    }
+    let obj = { first: 'Jane', last: 'Doe' };
+    for (let [key, value] of objectEntries(obj)) {
+      console.log(`${key}: ${value}`);
+    }
+
   </script>
 </body>
 
