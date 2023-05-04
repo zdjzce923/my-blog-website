@@ -9,169 +9,123 @@ categories:
   - [阅读]
 ---
 
-### 字面量类型
-当描述接口返回值的时候会定义如下接口：
+### 前言
+如果说函数代表着面向过程的编程，那么 Class 则代表着面向对象的编程，而它也是 ES6 新特性的重要一部分———终于可以和各种花式继承告别了。
+
+此章主要记录函数与 Class 的类型标注，以及一些在 TypeScript 中独有或相比 JavaScript 更加完全的概念，如**重载**与**面向对象的编程**等。函数部分，主要关注其参数类型、返回值类型以及重载的应用。 Class部分，除了类型以外，还有访问性修饰符、继承、抽象类等来自于面向对象理念的实际使用。
+
+### 函数
+
+#### 函数的类型签名
+函数的类型就是描述了**函数入参和返回值类型**，最简单的例子：
 ```ts
-interface Response {
-  code: number,
-  status: string,
-  data: any
+function foo(name: string): number {
+  return name.length;
 }
 ```
-但描述的其实不够准确，比如 code 可能是 200,400,500 等等，status 可能是 success 或者 failed。而上面只给出了宽泛的类型。
-结合字面量类型可以将上面改造成：
+函数中同样存在类型推导，这里的 number 就可以不写。
+在 JS 世界里，通常可以用**函数声明**和**函数表达式**来创建函数，函数声明就是上面的例子，函数表达式则是：
 ```ts
-interface Response {
-  code: 200 | 400 | 500,
-  status: 'success' | 'failed',
-  data: any
+// 方式1
+const foo: (name: string) => number = name => {
+  return name.length
+}
+// 方式2
+const foo = (name: string): number => {
+  return name.length  
 }
 ```
-在 TypeScript 中，这叫做字面量类型（Literal Types），它代表着比原始类型更精确的类型，同时也是原始类型的子类型。
-字面量类型主要包括字符串字面量类型、数字字面量类型、布尔字面量类型和对象字面量类型，它们可以直接作为类型标注：
 
-#### 联合类型
-联合类型可以理解为，一组可用的类型集合，只要赋值时是指定联合类型之一的类型，就合法。
+如果只是为了描述这个函数的类型结构，甚至可以使用 interface 来进行函数声明：
 ```ts
-interface Tmp {
-  mixed: true | string | 599 | {} | (() => {}) | (1 | 2)
+interface FuncFooStruct {
+  (name: string): number
 }
 ```
-- 对于联合类型中的函数类型，需要使用括号()包裹起来
-- 函数类型并不存在字面量类型，因此这里的 (() => {}) 就是一个合法的函数类型
-- 你可以在联合类型中进一步嵌套联合类型，但这些嵌套的联合类型最终都会被展平到第一级中
 
-联合类型通常用于实现互斥属性，即这个属性如果有字段1，就没有字段2。
+#### void
+在 TypeScript 中，一个没有返回值（即没有调用 return 语句）的函数，其返回类型应当被标记为 void 而不是 undefined，即使它实际的值是 undefined。
 ```ts
-interface Tmp {
-  user:
-    | {
-        vip: true;
-        expires: string;
-      }
-    | {
-        vip: false;
-        promotion: string;
-      };
-}
+// 没有调用 return 语句
+function foo(): void { }
 
-declare var tmp: Tmp;
-
-if (tmp.user.vip) {
-  console.log(tmp.user.expires);
+// 调用了 return 语句，但没有返回值
+function bar(): void {
+  return;
 }
 ```
-在这个例子中， user 属性会满足普通用户与 vip 用户两种类型，这里 vip 属性的类型基于布尔字面量类型声明，在实际使用时可以通过判断此属性为 true。
-
-也可以通过类型别名来服用一组字面量联合类型：
+在 TypeScript 中，undefined 类型是一个实际的、有意义的类型值，而 void 才代表着空的、没有意义的类型值。在没有实际返回值时，使用 void 类型能更好地说明这个函数没有进行返回操作。
+在上面的第二个例子中，其实更好的方式是使用 undefined ：
 ```ts
-type Code = 10000 | 10001 | 50000;
-
-type Status = "success" | "failure";
+function bar(): undefined {
+  return;
+}
 ```
-除了原始类型的字面量类型以外，对象类型也有着对应的字面量类型。
 
-#### 对象字面量类型
-对象字面量类型就是一个对象类型的值。
+#### 可选参数与 rest 参数
+在很多时候，我们会希望函数的参数可以更灵活，比如它不一定全都必传，当你不传入参数时函数会使用此参数的默认值。正如在对象类型中我们使用 ? 描述一个可选属性一样，在函数类型中也使用 ? 描述一个可选参数：
 ```ts
-interface Tmp {
-  obj: {
-    name: "xxx",
-    age: 18
+// 在函数逻辑中注入可选参数默认值
+function foo1(name: string, age?: number): number {
+  const inputAge = age || 18; // 或使用 age ?? 18
+  return name.length + inputAge
+}
+
+// 直接为可选参数声明默认值
+function foo2(name: string, age: number = 18): number {
+  const inputAge = age;
+  return name.length + inputAge
+}
+```
+需要注意的是，**可选参数必须位于必选参数之后**。毕竟在 JavaScript 中函数的入参是按照位置（形参），而不是按照参数名（名参）进行传递。
+
+
+对于 rest 参数的类型标注也比较简单，由于其实际上是一个数组，这里也应当使用数组类型进行标注：
+`function foo(arg1: string, ...rest: [number, boolean]) { }`
+
+#### 重载
+假设有下面一个函数
+```ts
+function func(foo: number, bar?: boolean): string | number {
+  if (bar) {
+    return String(foo);
+  } else {
+    return foo * 599;
+  }
+}
+```
+单看逻辑，根据 bar 的值判断返回字符串还是数字，但是根据联合类型并不能很好的体现参数与返回值之间的关联。于是就需要函数重载：
+```ts
+function func(foo: number, bar: true): string;
+function func(foo: number, bar?: false): number;
+function func(foo: number, bar?: boolean): string | number {
+  if (bar) {
+    return String(foo);
+  } else {
+    return foo * 599;
   }
 }
 
-const tmp: Tmp = {
-  obj: {
-    name: "xxx",
-    age: 18
-  }
-}
+const res1 = func(599); // number
+const res2 = func(599, true); // string
+const res3 = func(599, false); // number
+
 ```
 
-如果要实现一个对象字面量类型，意味着完全的实现这个类型每一个属性的每一个值。
-总的来说，在需要更精确类型的情况下，可以使用字面量类型加上联合类型的方式，将类型从 string 这种宽泛的原始类型直接收窄到 "resolved" | "pending" | "rejected" 这种精确的字面量类型集合。
+基于重载签名，就实现了将入参类型和返回值类型的可能情况进行关联，获得了更精确的类型标注能力。实际上，TypeScript 中的重载更像是伪重载，它只有一个具体实现，其重载体现在方法调用的签名上而非具体实现上。
 
-**无论是原始类型还是对象类型的字面量类型，它们的本质都是类型而不是值。它们在编译时同样会被擦除，同时也是被存储在内存中的类型空间而非值空间。**
-
-如果说字面量类型是对原始类型的进一步扩展（对象字面量类型的使用较少），那么枚举在某些方面则可以理解为是对对象类型的扩展。
-
-#### 枚举
+#### 异步函数、Generator 函数等类型签名
+对于异步函数、Generator 函数、异步 Generator 函数的类型签名，其参数签名基本一致，而返回值类型则稍微有些区别：
 ```ts
-enum Items {
-  Foo, // 0
-  Bar, // 1
-  Baz // 2
-}
-```
-如果没有声明枚举的值，它会默认从 0 开始，以 1 递增。
+async function asyncFunc(): Promise<void> {}
 
-如果只指定了某个成员的枚举值，之前未赋值的仍然会从 0 开始，之后的成员则会开始从枚举值递增。
+function* genFunc(): Iterable<void> {}
 
-```ts
-enum Items {
-  Foo, // 0,
-  Bar = 500,
-  Baz // 501
-}
+async function* asyncGenFunc(): AsyncIterable<void> {}
 ```
 
-在数字型枚举，还可以使用延迟求值：
-```ts
-const returnNum = () => 100 + 499
-enum Items {
-  Foo = returnNum(),
-  Bar = 599,
-  Baz
-}
-```
-延迟求值是有条件的，没有使用延迟求值的成员必须放在延迟枚举之后，或者第一位。
+### Class
+#### 类与类成员的类型签名
 
-也可以同时使用字符串枚举和数字枚举：
-```ts
-enum Mixed {
-  Num = 599,
-  Str = "xxx"
-}
-```
 
-枚举和对象的重要差距在于，**对象是单项映射**，只能从**键映射到键值**，枚举是双向映射的，枚举成员跟枚举值都可以互相映射。
 
-```ts
-enum Test {
-  test = 3,
-  dd,
-  ss
-}
-
-console.log(Test.dd);
-console.log(Test[4]);
-```
-
-可以看下枚举的编译产物，本质上是在对象里把键和值分别进行了赋值。相当于 `obj[key] = value` `obj[value] = key`
-
-```js
-var Test;
-(function (Test) {
-    Test[Test["test"] = 3] = "test";
-    Test[Test["dd"] = 4] = "dd";
-    Test[Test["ss"] = 5] = "ss";
-})(Test || (Test = {}));
-console.log(Test.dd);
-console.log(Test[4]);
-//# sourceMappingURL=index.js.map
-```
-
-但如果是字符串枚举，那就是**单项映射**，只有值为数字才是双向枚举。
-
-##### 常量枚举
-常亮枚举和枚举相似，只是其声明多了一个 const
-```ts
-const enum Items {
-  Foo,
-  Bar,
-  Baz
-}
-```
-
-它和普通枚举差异主要在访问性与编译产物，常量枚举**只能通过枚举成员访问枚举值**，反之不行。
