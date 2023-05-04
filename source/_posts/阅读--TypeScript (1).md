@@ -1,3 +1,14 @@
+---
+title: 阅读--TypeScript(1)
+date: 2023-05-03 23:01:12
+tags:
+  - 阅读
+  - 面试题
+  - TypeScript
+categories:
+  - [阅读]
+---
+
 TypeScript 已被开发人员普遍接受，和 ES6 语法以及前端框架一起，被视为前端开发领域的基础工具。但是，关于 TypeScript 的质疑却一直没有减少，比如：
 
 - 限制了 JavaScript 的灵活性；
