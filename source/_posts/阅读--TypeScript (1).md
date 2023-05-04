@@ -81,7 +81,7 @@ tsn index.ts
 `-P,--project`：指定你的 tsconfig 文件位置。默认情况下 ts-node 会查找项目下的 tsconfig.json 文件，如果你的配置文件是 tsconfig.script.json、tsconfig.base.json 这种，就需要使用这一参数来进行配置了。
 `-T, --transpileOnly`：禁用掉执行过程中的类型检查过程，这能让你的文件执行速度更快，且不会被类型报错卡住。这一选项的实质是使用了 TypeScript Compiler API 中的 transpileModule 方法，我们会在后面的章节详细讲解。
 `--swc`：在 transpileOnly 的基础上，还会使用 swc 来进行文件的编译，进一步提升执行速度。
-`--emit`：如果你不仅是想要执行，还想顺便查看下产物，可以使用这一选项来把编译产物输出到 .ts-node 文件夹下（需要同时与 **--compilerHost 选项一同使用** tsn --emit --compilerHos xxx.ts）。
+`--emit`：如果你不仅是想要执行，还想顺便查看下产物，可以使用这一选项来把编译产物输出到 .ts-node 文件夹下（需要同时与 **--compilerHost 选项一同使用** tsn --emit --compilerHost index.ts）。
 
 #### ts-node-dev
 ts-node-dev 基于 node-dev（一个类似 nodemon 的库，提供监听文件重新执行的能力） 与 ts-node 实现，并在重启文件进程时共享同一个 TS 编译进程，避免了每次重启时需要重新实例化编译进程等操作。
