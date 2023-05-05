@@ -96,8 +96,8 @@ home_banner:
   enable: true
   # Home banner image
   image: 
-    light: ../images/wallhaven-wqery6-light.webp # light mode
-    dark: ../images/wallhaven-wqery6-dark.webp # dark mode
+    light: ../my-image/wallhaven-d6k2wm.jpg # light mode
+    dark: ../my-image/wallhaven-d6k2wm.jpg # dark mode
   # Home banner title
   title: ZDJ&ZCE
   # Home banner subtitle
