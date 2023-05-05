@@ -180,6 +180,137 @@ class Foo {
 - private：此类成员仅能在类的内部被访问。
 - protected：此类成员仅能在类与子类中被访问，你可以将类和类的实例当成两种概念，即一旦实例化完毕（出厂零件），那就和类（工厂）没关系了，即不允许再访问受保护的成员。
 
+当不显式使用访问修饰符，成员的访问性会默认为 public，上面的例子里，通过构造函数为类成员赋值的方式还是麻烦，需要声明类属性以及在构造函数中赋值，可以直接**在构造函数中对参数应用访问性修饰符**
 
+```ts
+class Foo {
+  constructor(public arg1: string, private arg2: boolean) { }
+}
 
+new Foo("xxx", true)
+```
 
+#### **静态成员**
+在 TS 中，可以使用 static 关键字来标识静态成员
+```ts
+class Foo {
+  static staticHandler() { }
+
+  public instanceHandler() { }
+}
+
+```
+不同于实例成员，在类的内部静态成员无法通过 this 访问，需要通过类的属性去访问，如 `Foo.staticHandle`。可以查看编译到 ES5 的代码：
+```js
+var Foo = /** @class */ (function () {
+    function Foo() {
+    }
+    Foo.staticHandler = function () { };
+    Foo.prototype.instanceHandler = function () { };
+    return Foo;
+}());
+```
+
+**实例成员挂载在原型上，静态成员是直接挂载在函数上**。这就是二者的差异：**静态成员不会被实例继承，始终只属于当前这个类（以及子类）**。
+
+对于静态成员和实例成员的使用时机，可以使用**类+静态成员**来收敛变量。
+```ts
+class Utils {
+  public static identifier = "linbudu";
+
+  public static makeUHappy() {
+    Utils.studyWithU();
+    // ...
+  }
+
+  public static studyWithU() { }
+}
+
+Utils.makeUHappy();
+```
+
+#### **继承、实现、抽象类**
+与 JS 一样，TS 实现继承也是使用 extends 关键字：
+```ts
+class Base { }
+class Derived extends Base { }
+```
+对于这里的两个类，比较严谨的称呼是 基类（Base） 与 派生类（Derived）。当然，叫父类和子类也可以。
+而这部分需要主要了解的是：**派生类对基类成员的访问与覆盖操作。**
+
+基类中的哪些成员能够被派生类访问，完全是由访问修饰符决定的。派生类可以访问到 `public` 或 `protected`修饰的基类成员。基类的方法也可以在派生类中被覆盖，但仍然可以通过 super 访问到基类的方法。
+
+``` ts
+class Base {
+  print() { }
+}
+
+class Derived extends Base {
+  print() {
+    super.print()
+    // ...
+  }
+}
+```
+
+在派生类覆盖基类方法时，并不能确保派生类的这一方法能够覆盖基类方法，万一基类不存在这个方法呢？
+```ts
+class Base {
+  printWithLove() { }
+}
+
+class Derived extends Base {
+  override print() {
+    // ...
+  }
+}
+```
+在这里 TS 将会给出错误，因为尝试覆盖的方法并未在基类中声明。通过这一关键字我们就能确保首先这个方法在基类中存在，同时标识这个方法在派生类中被覆盖了。
+
+除了基类和派生类外，还有个重要的概念：**抽象类**。抽象类是对类结构与方法的抽象。它描述了一个类中应当有哪些成员。
+在 TS 中使用 abstract 关键字声明：
+```ts
+abstract class AbsFoo {
+  abstract absProp: string;
+  abstract get absGetter(): string;
+  abstract absMethod(name: string): string
+}
+```
+
+注意：抽象类中成员也要使用 abstract 关键字才能被视为成员，如这里的抽象方法，可以实现（**implements**）一个抽象类。
+```ts
+class Foo implements AbsFoo {
+  absProp: string = "xxx"
+
+  get absGetter() {
+    return "xxx"
+  }
+
+  absMethod(name: string) {
+    return name
+  }
+}
+```
+此时，我们必须完全实现这个抽象类的每一个抽象成员。需要注意的是，在 TypeScript 中无法声明静态的抽象成员。
+
+当然，也可以使用 interface 声明类的结构：
+```ts
+interface FooStruct {
+  absProp: string;
+  get absGetter(): string;
+  absMethod(input: string): string
+}
+```
+
+除此以外，我们还可以使用 Newable Interface 来描述一个类的结构（类似于描述函数结构的 Callable Interface）：
+```ts
+class Foo { }
+
+interface FooStruct {
+  new(): Foo
+}
+
+declare const NewableFoo: FooStruct;
+
+const foo = new NewableFoo();
+```
