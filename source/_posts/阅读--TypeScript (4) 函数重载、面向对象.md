@@ -126,6 +126,60 @@ async function* asyncGenFunc(): AsyncIterable<void> {}
 
 ### Class
 #### 类与类成员的类型签名
+Class 中的主要结构只有构造函数、属性、方法和访问符（Accessor）。
+属性的类型标注类似于变量，而构造函数、方法、存取器的类型编标注类似于函数：
+```ts
+class Foo {
+  prop: string;
+
+  constructor(inputProp: string) {
+    this.prop = inputProp;
+  }
+
+  print(addon: string): void {
+    console.log(`${this.prop} and ${addon}`)
+  }
+
+  get propA(): string {
+    return `${this.prop}+A`;
+  }
+
+  set propA(value: string) {
+    this.prop = `${value}+A`
+  }
+}
+```
+setter 方法不允许进行返回值的类型标注，可以理解为 setter 的返回值并不会被消费。
+
+#### 修饰符
+在 TypeScript 中能够为 Class 成员添加这些修饰符：`public / private / protected / readonly`。除 readonly 以外，其他三个都属于**访问性修饰符**，而 **readonly 属于操作性修饰符**（就和 interface 中的 readonly 意义一致）。
+
+```ts
+class Foo {
+  private prop: string;
+
+  constructor(inputProp: string) {
+    this.prop = inputProp;
+  }
+
+  protected print(addon: string): void {
+    console.log(`${this.prop} and ${addon}`)
+  }
+
+  public get propA(): string {
+    return `${this.prop}+A`;
+  }
+
+  public set propA(value: string) {
+    this.propA = `${value}+A`
+  }
+}
+```
+
+- public：此类成员在类、类的实例、子类中都能被访问。
+- private：此类成员仅能在类的内部被访问。
+- protected：此类成员仅能在类与子类中被访问，你可以将类和类的实例当成两种概念，即一旦实例化完毕（出厂零件），那就和类（工厂）没关系了，即不允许再访问受保护的成员。
+
 
 
 
