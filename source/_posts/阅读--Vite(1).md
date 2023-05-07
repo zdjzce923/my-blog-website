@@ -66,3 +66,6 @@ core-js 的作用是什么？其产物有哪些版本？core-js 和 core-js-pure
 **高级应用**: 我们将学习 Vite 的各种高级用法和构建性能优化手段，学会如何编写一个完整的 Vite 插件，熟练进行生产环境拆包，使用 Vite 搭建复杂的 SSR 工程，实现基于模块联邦的跨应用模块共享架构。
 
 剖析 Vite 的核心源码，理解诸如JIT、Proxy Module、Module Graph、HMR Boundary和Plugin Container 等源码中重要概念的作用及底层实现
+
+**手写实战**:  Vite 的开发时 no-bundle 服务，也就是开发环境下基于浏览器原生 ESM 的 Dev Server。然后，一步步完成一个生产环境打包工具（Bundler），从 AST 解析的功能开始，完成代码的词法分析（tokenize）和语义分析（parse），实现模块依赖图和作用域链的搭建，并完成 Tree Shaking、循环依赖检测及 Bundle 代码生成，最终实现一个类似 Rollup 的 Bundler。
+![avatar](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/52599ad0dbb344d59eafb00f360e99c3~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp?)
