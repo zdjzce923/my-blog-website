@@ -139,4 +139,28 @@ IIFE 和命名空间都是为了解决全局变量带来的命名冲突及作用
 
 #### CommonJS 规范
 Common 是业界最早正式提出的 JS 模块规范，主要用于服务端。这个规范也被业界广泛应用。对于模块规范一般包含2方面：
-- 
+- 统一的模块化代码规范
+- 实现自动加载模块的加载器（loader）
+  
+```js
+// module-a.js
+var data = "hello world";
+function getData() {
+  return data;
+}
+module.exports = {
+  getData,
+};
+
+// index.js
+const { getData } = require("./module-a.js");
+console.log(getData());
+```
+
+代码中使用 `require` 来导入一个模块，用 `module.exports` 导出一个模块。实际上 Node.js 内部会有响应的 loader 转译模块代码，最后模块代码会被处理成：
+```js
+(function (exports, require, module, __filename, __dirname) {
+  // 执行模块代码
+  // 返回 exports 对象
+});
+```
