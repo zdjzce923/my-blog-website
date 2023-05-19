@@ -304,13 +304,23 @@ interface FooStruct {
 
 除此以外，我们还可以使用 Newable Interface 来描述一个类的结构（类似于描述函数结构的 Callable Interface）：
 ```ts
-class Foo { }
-
-interface FooStruct {
-  new(): Foo
+interface ComesFromString {
+    name: string;
 }
 
-declare const NewableFoo: FooStruct;
+interface StringConstructable {
+    new(n: string): ComesFromString;
+}
 
-const foo = new NewableFoo();
+class MadeFromString implements ComesFromString {
+    constructor (public name: string) {
+        console.log('ctor invoked');
+    }
+}
+
+function makeObj(n: StringConstructable) {
+    return new n('hello!');
+}
+
+console.log(makeObj(MadeFromString).name);
 ```
