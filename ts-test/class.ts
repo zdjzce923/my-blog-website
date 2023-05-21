@@ -1,4 +1,4 @@
-interface ComesFromString {
+/* interface ComesFromString {
   name: string;
 }
 
@@ -16,4 +16,10 @@ function makeObj(n: StringConstructable) {
   return new n('hello!');
 }
 
-console.log(makeObj(MadeFromString).name);
+console.log(makeObj(MadeFromString).name); */
+
+function aTest (a: string, ...params: number []) {
+  console.log('params', params);
+}
+
+aTest('a', 1111, 2222)

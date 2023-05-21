@@ -1,3 +1,25 @@
 "use strict";
-const bar = new Foo(); // bar is inferred to be of type string
+/* interface ComesFromString {
+  name: string;
+}
+
+interface StringConstructable {
+  new(n: string): ComesFromString;
+}
+
+class MadeFromString implements ComesFromString {
+  constructor (public name: string) {
+      console.log('ctor invoked');
+  }
+}
+
+function makeObj(n: StringConstructable) {
+  return new n('hello!');
+}
+
+console.log(makeObj(MadeFromString).name); */
+function aTest(a, ...params) {
+    console.log('params', params);
+}
+aTest('a', '1111', '2222');
 //# sourceMappingURL=class.js.map

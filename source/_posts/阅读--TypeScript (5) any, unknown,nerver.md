@@ -1,0 +1,62 @@
+---
+title: 阅读--TypeScript(5) any, unknown, never
+date: 2023-05-21 19:02:30
+tags:
+  - 阅读
+  - 面试题
+  - TypeScript
+categories:
+  - [阅读]
+---
+
+### 内置类型：any 、unknown 与 never
+
+#### any
+在 TS 中，可以用 any 来表示任意类型，除了显式标记，TS 也会将变量/参数隐式推导为 any。比如使用 let 声明一个变量但不提供初始值，以及不为函数参数提供类型标注：
+```ts
+// any
+let foo;
+
+// foo、bar 均为 any
+function func(foo, bar){}
+```
+
+any 的本质是类型系统中的顶级类型，即 Top Type。它能兼容所有类型，也能被所有类型兼容。
+any 也是 TS 经常被诟病的原因之一，在很多场景如果我们要使用 any 可以多考虑考虑：
+1. 类型不兼容时可以考虑使用类型断言。
+2. 类型太复杂可以去断言为最简类型。如你需要调用 foo.bar.baz()，就可以先将 foo 断言为一个具有 bar 方法的类型。
+3. 如果想表达未知类型，最合理的是使用 unknown。
+
+#### unknown
+unknown 和 any 有些类似。可以将类型为 unknown 的变量赋值为任意类型。但 unknown 类型的值不能赋值给 any 和 unknown 类型以外的其他类型。
+
+```ts
+let testUnknown: unknown = 'test'
+
+testUnknown = 123
+testUnknown = {}
+testUnknown = 'zxc'
+
+const testStr: string = testUnknown  // Error
+const testNum: number = testUnknown  // Error
+const testObj: {} = testUnknown  // Error
+```
+
+unknown 和 any 的差异主要体现在赋值给其他变量，any 很万金油所有类型都能够包容它，但 unknown 坚信自己以后会有一个确切的类型，是有类型检查的。这一点也体现在对 unknown 类型的变量进行属性访问时：
+```ts
+let unknownVar: unknown;
+
+unknownVar.foo(); // 报错：对象类型为 unknown
+```
+
+要对 unknown 进行属性访问，需要进行类型断言：
+```ts
+(unknownVar as { foo: () => {} }).foo()
+```
+在类型未知的情况下，更推荐使用 unknown 标注。相当于你使用额外的心智负担保证了类型在各处的结构，同时还维持了类型检查的存在。
+
+如果说 any, unknown 是比原始类型更上层的存在，就好比字符串类型 string 比字面量类型 'zzz' 更上层的存在一样。**即 any/unknown -> 原始类型、对象类型 -> 字面量类型**。那么，是否存在比字面量类型更底层一些的类型？
+
+any 能够描述任意类型，字符串类型能够描述字符串和任意的字符串字面量，而字面量类型只表示一个精确的值类型。如要还要更底层，也就是再少一些类型信息，**那就只能什么都没有了**。
+
+而内置类型 never 就是这么一个“什么都没有”的类型。此前另一个“什么都没有”的类型，void。但相比于 void ，never 还要更加空白一些。
