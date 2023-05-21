@@ -60,3 +60,80 @@ unknownVar.foo(); // 报错：对象类型为 unknown
 any 能够描述任意类型，字符串类型能够描述字符串和任意的字符串字面量，而字面量类型只表示一个精确的值类型。如要还要更底层，也就是再少一些类型信息，**那就只能什么都没有了**。
 
 而内置类型 never 就是这么一个“什么都没有”的类型。此前另一个“什么都没有”的类型，void。但相比于 void ，never 还要更加空白一些。
+
+#### 虚无的 never
+```ts
+type UnionWithNever = "xxx" | 52 | true | void | never;
+```
+将鼠标移到类型上，会发现此时类型为 `'xxx' | 52 | true | void`，never 被无视掉了，而 void 仍然存在，void 是有类型但它是'没有返回值'的类型。而 never 是真的什么都没有。
+
+never 类型不携带任何类型信息，因此会在联合类型中被擦除。
+```ts
+declare let v1: never;
+declare let v2: void;
+
+v1 = v2; // X 类型 void 不能赋值给类型 never
+```
+
+在类型系统中，never 被称为 **Bottom Type**。是 TS 中最底层的类型。和 null, undefined一样，它是所有类型的子类型。但只有 never 类型的变量能够赋值给另一个 never 类型变量。
+
+never 主要用于类型检查，比如要抛出一个错误：
+```ts
+function justThrow(): never {
+  throw new Error()
+}
+```
+
+如果一个函数的返回值类型为 never 那么它下方的代码都会被视为无效代码不执行：
+```ts
+function testA() {
+  justThrow()
+  console.log('123') // 不会执行 因为上面执行完后，已经无效
+}
+```
+
+也可以显式利用它来进行类型检查，即上面在联合类型中 never 类型神秘消失的原因。假设，需要对一个联合类型的每个类型分支进行不同处理：
+```ts
+declare const strOrNumOrBool: string | number | boolean;
+
+if (typeof strOrNumOrBool === "string") {
+  console.log("str!");
+} else if (typeof strOrNumOrBool === "number") {
+  console.log("num!");
+} else if (typeof strOrNumOrBool === "boolean") {
+  console.log("bool!");
+} else {
+  throw new Error(`Unknown input type: ${strOrNumOrBool}`);
+}
+```
+
+如果希望这个变量的每一种类型都需要得到妥善处理，在最后可以抛出一个错误，但这是运行时才会生效的措施，是否能在类型检查时就分析出来？
+实际上，TS 很强大，在经过每一个 if，TS 的分支就会减少一个，直到最后类型收缩到 never。即一个无法再细分、本质上并不存在的虚空类型。可以利用只有 never 类型能赋值给 never 类型这一点，来巧妙地分支处理检查：
+```ts
+if (typeof strOrNumOrBool === "string") {
+    // 一定是字符串！
+  strOrNumOrBool.charAt(1);
+} else if (typeof strOrNumOrBool === "number") {
+  strOrNumOrBool.toFixed();
+} else if (typeof strOrNumOrBool === "boolean") {
+  strOrNumOrBool === true;
+} else {
+  const _exhaustiveCheck: never = strOrNumOrBool;
+  throw new Error(`Unknown input type: ${_exhaustiveCheck}`);
+}
+```
+
+假设现在新增了一个函数类型，但却没有在代码中新增分支，就会在 else 语句块中出现函数类型不能赋值给 never 类型，来提示错误，确保每个分支都能够被妥善处理。
+
+never 时常还会不请自来，例如常常会遇到这样的错误：
+```ts
+const arr = [];
+
+arr.push("xxx"); // 类型“string”的参数不能赋给类型“never”的参数。
+
+```
+
+此时这个未标明类型的数组被推导为了 `never[]` 类型，这种情况仅会在你启用了 `strictNullChecks` 配置，同时禁用了 `noImplicitAny` 配置时才会出现。解决的办法也很简单，为这个数组声明一个具体类型即可。
+
+
+### 类型断言

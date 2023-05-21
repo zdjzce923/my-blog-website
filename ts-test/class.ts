@@ -18,8 +18,11 @@ function makeObj(n: StringConstructable) {
 
 console.log(makeObj(MadeFromString).name); */
 
-function aTest (a: string, ...params: number []) {
-  console.log('params', params);
+function justThrow(): never {
+  throw new Error()
 }
 
-aTest('a', 1111, 2222)
+function testA() {
+  justThrow()
+  console.log('123') // 不会执行 因为上面执行完后，已经无效
+}
