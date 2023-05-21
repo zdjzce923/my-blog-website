@@ -110,16 +110,18 @@ if (typeof strOrNumOrBool === "string") {
 如果希望这个变量的每一种类型都需要得到妥善处理，在最后可以抛出一个错误，但这是运行时才会生效的措施，是否能在类型检查时就分析出来？
 实际上，TS 很强大，在经过每一个 if，TS 的分支就会减少一个，直到最后类型收缩到 never。即一个无法再细分、本质上并不存在的虚空类型。可以利用只有 never 类型能赋值给 never 类型这一点，来巧妙地分支处理检查：
 ```ts
-if (typeof strOrNumOrBool === "string") {
+function testFun(strOrNumOrBool: string | number | boolean) {
+  if (typeof strOrNumOrBool === "string") {
     // 一定是字符串！
-  strOrNumOrBool.charAt(1);
-} else if (typeof strOrNumOrBool === "number") {
-  strOrNumOrBool.toFixed();
-} else if (typeof strOrNumOrBool === "boolean") {
-  strOrNumOrBool === true;
-} else {
-  const _exhaustiveCheck: never = strOrNumOrBool;
-  throw new Error(`Unknown input type: ${_exhaustiveCheck}`);
+    strOrNumOrBool.charAt(1);
+  } else if (typeof strOrNumOrBool === "number") {
+    strOrNumOrBool.toFixed();
+  } else if (typeof strOrNumOrBool === "boolean") {
+    strOrNumOrBool === true;
+  } else {
+    const _exhaustiveCheck: never = strOrNumOrBool;
+    throw new Error(`Unknown input type: ${_exhaustiveCheck}`);
+  }
 }
 ```
 
