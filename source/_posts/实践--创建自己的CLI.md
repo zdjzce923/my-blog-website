@@ -26,7 +26,7 @@ categories:
 
 ### 准备脚手架项目
 
-1. 初始化项目
+#### 1. 初始化项目
 ```bash
 mkdir test-cli && cd test-cli
 npm init // 初始化项目
@@ -68,3 +68,23 @@ npm init // 初始化项目
 完整的目录结构：
 ![avatar]('https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/3/24/1710d174c0923990~tplv-t2oaga2asx-zoom-in-crop-mark:4536:0:0:0.awebp')
 
+使用 npm link 即可将 bin 下的命令软连接到全局直接使用。
+
+#### 2. 项目启动
+可执行文件的行首一定要加入 `#!/usr/bin/env node` 这行代码可以告诉系统该脚本由 node 来执行。
+`bin/cmd`
+
+在 src/main.js 中添加测试代码
+```js
+console.log('hello world')
+```
+接着运行 npm run watch 这样修改代码就可以实时更新了。
+
+#### 3. 处理命令行
+command 方法设置命令的名字、description 方法是设置命令的描述、alias 方法设置命令简称、options 设置命令需要的参数。commander 更详细的文档可以去 commander.js 官网查看。
+
+#### 4. 代码编写
+
+遇到的问题：在阅读文章时添加了相关的依赖，但有个问题是，文章里的依赖是 babel/cli 和 babel/preset-env。在编译的过程中是会出问题的，因为一些依赖的版本很高，是 ESM 模块，但打包后用的是 CJS，两边并不兼容。。。所以要升级成 @babel/cli 和 @babel/preset-env 并且配置下默认为 ESM
+
+创建 create.js 读取 promptList.json 中的配置让用户选择。
