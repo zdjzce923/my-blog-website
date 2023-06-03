@@ -139,4 +139,67 @@ arr.push("xxx"); // 类型“string”的参数不能赋给类型“never”的�
 
 
 ### 类型断言
-类型断言能够显式告知类型检查程序当前变量的类型。它其实就是将变量的已有类型更改为新指定类型的操作
+类型断言能够显式告知类型检查程序当前变量的类型。它其实就是将变量的已有类型更改为新指定类型的操作。基本语法就是 `as NewType`
+
+例如可以将 any unknown 断言到一个具体的类型：
+```ts
+let unknownV: unknown
+
+(unknownV as { foo: () => {} }).foo()
+
+```
+
+也可以在**联合类型中断言**一个具体的分支:
+```ts
+function foo(union: string | number) {
+  if ((union as string).includes('zd')) {}
+
+  if ((union as number).toFixed() === '500') {}
+}
+
+```
+
+什么时候该使用类型断言，就是 TS 分析不正确或者不符合预期时将其断言为此处的正确类型。除了使用 as ，也可以使用 `<>` 来类型断言，不过在 tsx 中并不能很好的被分析出来。
+
+#### 双重断言
+```ts
+const str: string = '123';
+
+// 类型 "string" 到类型 "{ handler: () => {}; }" 的转换可能是错误的，因为两种类型不能充分重叠。
+(str as {handler: () => {} }).handler()
+```
+此时会提醒类型转换错误，可以先断言到 unknown 类型，再断言到预期类型：
+```ts
+const str: string = 'zdj';
+
+(str as unknown as { handler: () => {} }).handler()
+
+// 使用尖括号断言
+(< {handler: () => {} }>(<unknown>str)).handler()
+```
+
+#### 非空断言
+非空断言其实是类型断言的简化，使用了 `!` 语法，即 `obj!.func()!.prop` 的形式标记前面的一个声明一定是非空的（其实就是剔除了 null 和 undefined）
+
+```ts
+const foo = {
+  func?: () => ({
+    prop?: number | null
+  })
+}
+
+foo.func().prop.toFixed()
+
+```
+
+此时 func 在 foo 不一定存在，prop 在 func 调用不一定存在，就会受到两个类型报错。要解决就是非空断言。
+`foo.func!().prop!.toFixed()`
+
+其应用位置类似可选链：
+```ts
+foo.func?.().prop?.toFixed()
+```
+
+但不同的是，非空断言运行时会保持调用链，因此在运行时可能会报错，但可选链在一部分收到 undefined 或者 null 就会短路。不会再发生调用。
+
+
