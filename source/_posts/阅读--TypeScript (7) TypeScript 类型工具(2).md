@@ -254,3 +254,65 @@ name.toFixed()
 学习到了新的类型工具，包括操作符 keyof、typeof，属于类型语法的交叉类型、索引类型（的三个部分）、映射类型、类型守卫等等。
 在类型守卫方面，通过 is 关键字来断言某个函数的返回值，让其能够在分支切换中正确推导。使用类型保护类型守卫来进行类型控制流的分析
 纠正等。同时，也了解到了可辨识属性（不同的类型中独一的属性）而他们组合起来就是可辨识联合类型。
+
+
+### 接口合并
+在 interface 中接口还能够使用继承进行合并，在继承子接口可以声明同名属性，但不能够覆盖父接口属性。**子接口中需要兼容付接口中的属性**:
+
+```ts
+interface Struct1 {
+  primitiveProp: string;
+  objectProp: {
+    name: string;
+  };
+  unionProp: string | number;
+}
+
+// 接口“Struct2”错误扩展接口“Struct1”。
+interface Struct2 extends Struct1 {
+  // “primitiveProp”的类型不兼容。不能将类型“number”分配给类型“string”。
+  primitiveProp: number;
+  // 属性“objectProp”的类型不兼容。
+  objectProp: {
+    age: number;
+  };
+  // 属性“unionProp”的类型不兼容。
+  // 不能将类型“boolean”分配给类型“string | number”。
+  unionProp: boolean;
+}
+```
+
+类似的。如果直接声明多个同名接口，虽然接口会合并，但这些同名属性的类型仍然需要兼容。
+```ts
+interface Struct1 {
+  primitiveProp: string
+}
+
+interface Struct1 {
+  // 后续属性声明必须属于同一类型。
+  // 属性“primitiveProp”的类型必须为“string”，但此处却为类型“number”。
+  primitiveProp: number
+}
+```
+
+如果是接口和类型别名之间的合并呢？如接口继承类型别名，类型别名使用交叉类型合并接口。
+```ts
+type Base = {
+  name: string;
+};
+
+interface IDerived extends Base {
+  // 报错！就像继承接口一样需要类型兼容
+  name: number;
+  age: number;
+}
+
+interface IBase {
+  name: string;
+}
+
+// 合并后的 name 同样是 never 类型
+type Derived = IBase & {
+  name: number;
+};
+```
