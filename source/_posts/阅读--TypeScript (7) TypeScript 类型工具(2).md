@@ -16,7 +16,7 @@ JS 中的 typeof 运用于检查变量类型，TS 中的 typeof返回的是一�
 ```ts
 const str = "zdj";
 
-const obj = { name: "zdj" };
+const obj = { name: "zdj" }
 
 const nullVar = null;
 const undefinedVar = undefined;
@@ -133,3 +133,124 @@ export const isPrimitive = (val: unknown): val is Primitive => ['string', 'numbe
 ```
 
 ### 基于 in 与 instanceof 的类型保护
+in 操作符在 JS 中已经存在，可以通过 `key in object` 判断这个 key 是否存在于 object 或原型链上。
+
+既然能起到区分作用，那么 TS 中自然也可以用来保护类型：
+```ts
+interface Foo {
+  foo: string
+  fooOnly: boolean
+}
+
+interface Bar {
+  bar: string
+  barOnly: boolean
+}
+
+function handle(val: Foo | Bar) {
+  if ('foo' in Foo) {
+    val.fooOnly
+  } else {
+    val.barOnly
+  }
+}
+
+```
+
+在这里使用了 foo 和 bar 区分 input 联合类型，然后就可以在对应的分支代码块中正确访问到他们之一的独有类型。但是如果以共有的类型(值也一样的情况)来判断，那么分支里将会是初始的联合类型。
+
+当 A 类型和 B 类型中包含同一个属性，但他们的值不同，依然可以进行独立判断，这可以称为**可辨识属性**:
+
+```ts
+interface Foo {
+  name: 'foo'
+  foo: string
+  fooOnly: boolean
+}
+
+interface Bar {
+  name: 'bar'
+  bar: string
+  barOnly: boolean
+}
+
+function handle(val: Foo | Bar) {
+  if (val.name == 'foo') {
+    val.fooOnly
+  } else {
+    val.barOnly
+  }
+}
+
+```
+
+除此之外， JS 中还存在一个功能类似于 typeof  与 in 的操作符：**instanceof**, 它判断的是原型级别的关系，如 `foo instanceof Base` 会沿着 foo 的原型链查找 Base.prototype 是否存在其上，也可以简单认为这是判断 foo 是否是 Base 基类的实例。同样的，instanceof 在 TS 中也可以用来进行类型保护：
+```ts
+class FooBase {}
+class BarBase {}
+
+class Foo extends FooBase {
+  fooOnly()
+}
+
+class Bar extends BarBase {
+  barOnly()
+}
+
+function handle(val: Foo | Bar) {
+  if (val instanceof FooBase) {
+    val.fooOnly()
+  } else {
+    val.barOnly()
+  }
+}
+```
+
+除了使用 is 关键字的类型守卫外，还有 asserts 关键字的类型断言守卫。
+
+### 类型断言守卫
+如果写过测试用例或者使用过 NodeJs 的 asserts 模块，那么应该不陌生：
+```ts
+import assert from 'assert'
+
+let name: any = 'zdj'
+
+assert(typeof name === 'number')
+
+// number 类型
+name.toFixed()
+```
+上面的代码在运行时会抛出一段错误，因为 assert 接受到的表达式结果为 false。类似于类型守卫的场景：如果断言不成立，比如这里的值类型不为 number，那么在断言下方的代码就执行不到。如果断言通过了，不管最开始是什么类型，断言后的代码中就**一定符合断言的类型**。这里如果断言通过，那么接下来就将是 number。
+
+但**断言类型和类型守卫最大的不同在于**，在判断条件不通过时，断言守卫需要抛出一个错误，类型守卫只需要剔除预期的类型，断言守卫并不会始终抛出错误，所以它的返回值类型并不能简单地使用 never 类型。为此，TS3.7 版本加入了 asserts 关键字来进行断言场景下的类型守卫，比如 assert 方法的签名可以是这样的：
+```ts
+function assert(condition: any, msg?: string): assert condition {
+  if (!condition) throw new Error(msg)
+}
+```
+这里用的是 assert condition，而 condition 来自于实例逻辑，这也意味着将 condition 这一逻辑层面的代码，作为了类型层面的判断依据，相当于在返回值类型中使用了一个逻辑表达式进行了类型标注。
+
+举例来说，对于 `assert(typeof name === 'number')` 这么一个断言，如果函数成功返回，就说明后续代码中的 condition 都成立，也就是 name 神奇的变成了 number。
+
+这里的 condition 甚至可以结合使用 is 关键字来提供进一步的类型守卫能力：
+```ts
+let name: any = 'zdj'
+
+function assertIsNumber(val: any): asserts val is number {
+  if (typeof val != 'number') {
+    throw new Error('Not a Number')
+  }
+}
+
+assertIsNumber(name)
+
+name.toFixed()
+
+```
+这种情况下，无需再为断言守卫传入一个表达式，而是可以将这个判断用的表达式放进断言守卫的内部，来获得更独立地代码逻辑。
+
+
+### 总结
+学习到了新的类型工具，包括操作符 keyof、typeof，属于类型语法的交叉类型、索引类型（的三个部分）、映射类型、类型守卫等等。
+在类型守卫方面，通过 is 关键字来断言某个函数的返回值，让其能够在分支切换中正确推导。使用类型保护类型守卫来进行类型控制流的分析
+纠正等。同时，也了解到了可辨识属性（不同的类型中独一的属性）而他们组合起来就是可辨识联合类型。
