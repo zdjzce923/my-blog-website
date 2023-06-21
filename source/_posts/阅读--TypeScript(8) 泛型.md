@@ -1,5 +1,5 @@
 ---
-title: 阅读--TypeScript(1)
+title: 阅读--TypeScript(8) 泛型
 date: 2023-06-18 15:01:12
 tags:
   - 阅读
