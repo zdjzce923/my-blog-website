@@ -205,3 +205,33 @@ function pick<T extends Obj, U extends [keyof T]>(obj: T, keys: U): Picks<T> {
 ```ts
 type Handle = <T>(input: T): T => {}
 ```
+
+
+### Class 中的泛型
+Class 中的泛型坑位可以被方法、属性、装饰器等消费。Class 内的方法还可以再声明自己的泛型参数:
+```ts
+class Queue<TElementType> {
+  private _list: TElementType[];
+
+  constructor(initial: TElementType[]) {
+    this._list = initial;
+  }
+
+  // 入队一个队列泛型子类型的元素
+  enqueue<TType extends TElementType>(ele: TType): TElementType[] {
+    this._list.push(ele);
+    return this._list;
+  }
+
+  // 入队一个任意类型元素（无需为队列泛型子类型）
+  enqueueWithUnknownType<TType>(element: TType): (TElementType | TType)[] {
+    return [...this._list, element];
+  }
+
+  // 出队
+  dequeue(): TElementType[] {
+    this._list.shift();
+    return this._list;
+  }
+}
+```
